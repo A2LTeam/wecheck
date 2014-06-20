@@ -12,4 +12,5 @@
 @property (strong, nonatomic) NSString *shop;
 @property (strong, nonatomic) NSString *date;
 @property (strong, nonatomic) NSString *price;
+
 @end
