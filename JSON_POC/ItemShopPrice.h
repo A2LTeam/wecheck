@@ -9,7 +9,9 @@
 #import <Foundation/Foundation.h>
 
 @interface ItemShopPrice : NSObject
+
 @property (strong, nonatomic) NSString *shop;
+
 @property (strong, nonatomic) NSString *date;
 @property (strong, nonatomic) NSString *price;
 
