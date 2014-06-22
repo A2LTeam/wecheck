@@ -20,16 +20,14 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.HTTP;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.apache.http.util.EntityUtils;
 
 import a2l.tools.barcodeuploader.R;
 import a2l.tools.barcodeuploader.constant.ItemCst;
+import a2l.tools.barcodeuploader.database.DataManager;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.pm.ActivityInfo;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
@@ -45,9 +43,9 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 public class CameraTestActivity extends Activity {
-	
+
 	private static final String SUBMIT_URL = "http://ktslopez.bugs3.com/setBarCode.php";
-	
+
 	private Camera mCamera;
 	private CameraPreview mPreview;
 	private Handler autoFocusHandler;
@@ -92,49 +90,72 @@ public class CameraTestActivity extends Activity {
 
 		scanButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
+				Bundle extras = getIntent().getExtras();
+				itemCode = extras.getString(ItemCst.CODE);
 				if (barcodeScanned) {
-					Bundle extras = getIntent().getExtras();
-					itemCode = extras.getString(ItemCst.CODE);
-					
-						AsyncTask<Void, Void, Boolean> loadingTask = new AsyncTask<Void, Void, Boolean>() {
+					AsyncTask<Void, Void, Boolean> loadingTask = new AsyncTask<Void, Void, Boolean>() {
 
-							// --------------------------------------------------------------------------------------------------
-							@Override
-							protected Boolean doInBackground(Void... params) {
-								try {
-									String url = SUBMIT_URL;
-									// + "itemCode=" + itemCode + "&barCode=" + barcodeTxt
-									HttpGet httpGet = new HttpGet(url + "?itemCode=" + itemCode + "&barCode=" + barcodeTxt);
-									HttpClient client = new DefaultHttpClient();
-									HttpResponse response = client.execute(httpGet);
-									finish();
-								} catch (UnsupportedEncodingException e) {
-									e.printStackTrace();
-								} catch (ClientProtocolException e) {
-									e.printStackTrace();
-								} catch (IOException e) {
-									e.printStackTrace();
+						// --------------------------------------------------------------------------------------------------
+						@Override
+						protected Boolean doInBackground(Void... params) {
+							boolean updateSuccess = false;
+							try {
+								String url = SUBMIT_URL;
+								// + "itemCode=" + itemCode + "&barCode=" +
+								// barcodeTxt
+								HttpGet httpGet = new HttpGet(url + "?itemCode=" + itemCode + "&barCode=" + barcodeTxt);
+								HttpClient client = new DefaultHttpClient();
+								HttpResponse response = client.execute(httpGet);
+								if ("Success".equals(EntityUtils.toString(response.getEntity()))) {
+									updateSuccess = true;
 								}
-								return barcodeScanned;
-							}
+								// Success
 
-							// --------------------------------------------------------------------------------------------------
-							@Override
-							protected void onPostExecute(Boolean succeed) {
-
+							} catch (UnsupportedEncodingException e) {
+								e.printStackTrace();
+							} catch (ClientProtocolException e) {
+								e.printStackTrace();
+							} catch (IOException e) {
+								e.printStackTrace();
 							}
-						};
-						loadingTask.execute();
-				} else {
-					barcodeScanned = false;
-					scanText.setText("Scanning...");
-					mCamera.setPreviewCallback(previewCb);
-					mCamera.startPreview();
-					previewing = true;
-					mCamera.autoFocus(autoFocusCB);
+							return updateSuccess;
+						}
+
+						// --------------------------------------------------------------------------------------------------
+						@Override
+						protected void onPostExecute(Boolean succeed) {
+							if (succeed) {
+								new AlertDialog.Builder(getActivity()).setIcon(android.R.drawable.ic_dialog_alert)
+										.setTitle("Update Success").setMessage("Update Successfully").show();
+								DataManager dataManager = DataManager.getInstance(getActivity());
+								dataManager.openDatabase();
+								String query = "UPDATE ITEM SET BARCODE = '" + barcodeTxt + "' WHERE CODE = '" + itemCode
+										+ "'";
+								dataManager.getSQLiteDatabase().execSQL(query);
+								dataManager.closeDatabase();
+								setResult(RESULT_OK);
+								finish();
+							} else {
+								new AlertDialog.Builder(getActivity()).setIcon(android.R.drawable.ic_dialog_alert)
+										.setTitle("Update Fail").setMessage("Update Fail").show();
+								turnOnBarcodeScan();
+							}
+						}
+					};
+					loadingTask.execute();
+
 				}
 			}
 		});
+	}
+
+	private void turnOnBarcodeScan() {
+		barcodeScanned = false;
+		scanText.setText("Scanning...");
+		mCamera.setPreviewCallback(previewCb);
+		mCamera.startPreview();
+		previewing = true;
+		mCamera.autoFocus(autoFocusCB);
 	}
 
 	public void onPause() {
@@ -206,5 +227,9 @@ public class CameraTestActivity extends Activity {
 
 	public void setIsSubmit(boolean isSubmit) {
 		this.isSubmit = isSubmit;
+	}
+
+	private Activity getActivity() {
+		return this;
 	}
 }

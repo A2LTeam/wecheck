@@ -135,7 +135,7 @@ public class ListViewFragment extends Fragment implements TranListCallBack, OnIt
 				DataManager dataManager = DataManager.getInstance(getActivity());
 				dataManager.openDatabase();
 				String query = "SELECT * FROM " + ItemCst.TABLE_NAME + " WHERE CATEGORY = '" + getCategory()
-						+ "' AND BARCODE IS NULL ORDER BY CATEGORY";
+						+ "' ORDER BY BRAND";
 				Cursor cursor = dataManager.getSQLiteDatabase().rawQuery(query, null);
 				while (cursor.moveToNext()) {
 					Item item = new Item();
@@ -143,6 +143,7 @@ public class ListViewFragment extends Fragment implements TranListCallBack, OnIt
 					item.setName(dataManager.getStringFromColumn(cursor, ItemCst.FIELD_NAME));
 					item.setCategory(dataManager.getStringFromColumn(cursor, ItemCst.FIELD_CATEGORY));
 					item.setItemCode(dataManager.getStringFromColumn(cursor, ItemCst.FIELD_CODE));
+					item.setBarcode(dataManager.getStringFromColumn(cursor, ItemCst.FIELD_BARCODE));
 					list.add(item);
 				}
 				cursor.close();
@@ -183,6 +184,7 @@ public class ListViewFragment extends Fragment implements TranListCallBack, OnIt
 		viewHolder.put(R.id.name, view.findViewById(R.id.name));
 		viewHolder.put(R.id.brand, view.findViewById(R.id.brand));
 		viewHolder.put(R.id.itemCode, view.findViewById(R.id.itemCode));
+		viewHolder.put(R.id.barcode, view.findViewById(R.id.barcode));
 		return viewHolder;
 	}
 
@@ -192,8 +194,7 @@ public class ListViewFragment extends Fragment implements TranListCallBack, OnIt
 		((TextView) viewHolder.get(R.id.brand)).setText(item.getBrand());
 		((TextView) viewHolder.get(R.id.name)).setText(item.getName());
 		((TextView) viewHolder.get(R.id.itemCode)).setText(item.getItemCode());
-		// ((TextView)
-		// viewHolder.get(R.id.category)).setText(item.getCategory());
+		((TextView) viewHolder.get(R.id.barcode)).setText(item.getBarcode());
 	}
 
 	@Override
@@ -201,10 +202,21 @@ public class ListViewFragment extends Fragment implements TranListCallBack, OnIt
 		System.out.println("Hello");
 		Intent intent = new Intent();
 		intent.setClass(getActivity(), CameraTestActivity.class);
-		intent.putExtra(ItemCst.CODE, ((TextView)view.findViewById(R.id.itemCode)).getText());
-		startActivity(intent);
+		intent.putExtra(ItemCst.CODE, ((TextView) view.findViewById(R.id.itemCode)).getText());
+		// startActivity(intent);
+		startActivityForResult(intent, R.id.list_view);
 	}
-	
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		switch (requestCode) {
+		case R.id.list_view:
+			loadTransactionRecords();
+		}
+	}
+
 	@Override
 	public int getLayoutId() {
 		return R.layout.list_detail;

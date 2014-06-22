@@ -6,6 +6,7 @@ public class Item extends Entity {
 	private String brand;
 	private String category;
 	private String itemCode;
+	private String barcode;
 
 	public String getName() {
 		return name;
@@ -37,5 +38,13 @@ public class Item extends Entity {
 
 	public void setItemCode(String itemCode) {
 		this.itemCode = itemCode;
+	}
+
+	public String getBarcode() {
+		return barcode;
+	}
+
+	public void setBarcode(String barcode) {
+		this.barcode = barcode;
 	}
 }

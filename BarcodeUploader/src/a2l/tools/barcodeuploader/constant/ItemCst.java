@@ -8,6 +8,7 @@ public final class ItemCst {
 	public static final String FIELD_CATEGORY = "category";
 	public static final String FIELD_CODE = "code";
 	public static final String FIELD_BRAND = "brand";
+	public static final String FIELD_BARCODE = "barcode";
 	
 	public static final String URL = "http://ktslopez.bugs3.com/archive/itemlist.php";
 	
