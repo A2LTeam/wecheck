@@ -3,15 +3,16 @@
  */
 package com.forfun.wecheck.activity;
 
-import android.app.Fragment;
 import android.os.Bundle;
-import android.support.v7.appcompat.R;
+import android.support.v4.app.FragmentActivity;
+
+import com.forfun.wecheck.R;
 
 /**
  * @author Nick
- *
+ * 
  */
-public class ScanActivity extends Fragment  {
+public class ScanActivity extends FragmentActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.scan);
