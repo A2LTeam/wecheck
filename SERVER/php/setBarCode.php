@@ -12,8 +12,14 @@ if (mysqli_connect_errno()) {
 }
 else
 {
+	$barCode = "null";
+	if (!empty($_REQUEST['barCode']))
+	{
+		$barCode = "'".$_REQUEST['barCode']."'";
+	}
+
 	if (!mysqli_query($con,
-		"UPDATE ITEM SET BARCODE = '".$_REQUEST['barCode']."' WHERE ITEM_CODE = '".$_REQUEST['itemCode']."'"))
+		"UPDATE ITEM SET BARCODE = ".$barCode." WHERE ITEM_CODE = '".$_REQUEST['itemCode']."'"))
 	{
 		echo("Error: ". mysqli_error($con));
 	}	
