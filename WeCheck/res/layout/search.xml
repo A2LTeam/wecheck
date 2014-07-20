@@ -3,6 +3,47 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
+
+    <EditText
+        android:id="@+id/search_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/search_text"
+        android:inputType="text" />
+
+    <TextView  
+		android:layout_width="match_parent" 
+		android:layout_height="wrap_content" 
+		android:text="@string/search_select_category" />
     
+    <Spinner
+        android:id="@+id/search_category"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:prompt="@string/search_category_prompt" />
+
+    <TextView  
+		android:layout_width="match_parent" 
+		android:layout_height="wrap_content" 
+		android:text="@string/search_select_subcategory" />
+    
+    <Spinner
+        android:id="@+id/search_subCategory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:prompt="@string/search_subcategory_prompt" />
+
+    <Button
+        android:id="@+id/search_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:text="@string/search_button" />
+
+    <ListView
+        android:id="@+id/search_result"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </ListView>
 
 </LinearLayout>

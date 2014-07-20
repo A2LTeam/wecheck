@@ -16,6 +16,11 @@ public final class R {
         public static final int abc_slide_out_bottom=0x7f040004;
         public static final int abc_slide_out_top=0x7f040005;
     }
+    public static final class array {
+        public static final int category=0x7f0c0000;
+        public static final int searchResult=0x7f0c0002;
+        public static final int subCategory=0x7f0c0001;
+    }
     public static final class attr {
         /**  Custom divider drawable to use for elements in the action bar. 
          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
@@ -1023,12 +1028,16 @@ containing a value of this type.
         public static final int search_badge=0x7f050032;
         public static final int search_bar=0x7f050031;
         public static final int search_button=0x7f050033;
+        public static final int search_category=0x7f05003e;
         public static final int search_close_btn=0x7f050038;
         public static final int search_edit_frame=0x7f050034;
         public static final int search_go_btn=0x7f05003a;
         public static final int search_mag_icon=0x7f050035;
         public static final int search_plate=0x7f050036;
+        public static final int search_result=0x7f050040;
         public static final int search_src_text=0x7f050037;
+        public static final int search_subCategory=0x7f05003f;
+        public static final int search_text=0x7f05003d;
         public static final int search_voice_btn=0x7f05003b;
         public static final int shortcut=0x7f05002e;
         public static final int showCustom=0x7f050007;
@@ -1142,6 +1151,12 @@ containing a value of this type.
          */
         public static final int abc_shareactionprovider_share_with_application=0x7f0a000b;
         public static final int app_name=0x7f0a000d;
+        public static final int search_button=0x7f0a0015;
+        public static final int search_category_prompt=0x7f0a0012;
+        public static final int search_select_category=0x7f0a0016;
+        public static final int search_select_subcategory=0x7f0a0017;
+        public static final int search_subcategory_prompt=0x7f0a0013;
+        public static final int search_text=0x7f0a0014;
         public static final int tab_favorite=0x7f0a0010;
         public static final int tab_hot=0x7f0a000f;
         public static final int tab_scan=0x7f0a000e;

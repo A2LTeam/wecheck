@@ -5,4 +5,31 @@
     <string name="tab_hot">Hot</string>
     <string name="tab_favorite">Favorite</string>
     <string name="tab_search">Search</string>
+    <string name="search_category_prompt">Please select category</string>
+    <string name="search_subcategory_prompt">Please select sub-category</string>
+    <string name="search_text">Search by key words</string>
+    <string name="search_button">Search</string>
+    <string name="search_select_category">Select category:</string>
+    <string name="search_select_subcategory">Select sub-category</string>
+    
+    <string-array name="category">
+        <item>c1</item>
+        <item>c2</item>
+        <item>c3</item>
+        <item>c4</item>
+    </string-array>
+    
+    <string-array name="subCategory">
+        <item>sc1</item>
+        <item>sc2</item>
+        <item>sc3</item>
+        <item>sc4</item>
+    </string-array>
+    
+    <string-array name="searchResult">
+        <item>item1</item>
+        <item>item2</item>
+        <item>item3</item>
+        <item>item4</item>
+    </string-array>
 </resources>
