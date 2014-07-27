@@ -3,6 +3,7 @@
  */
 package com.forfun.wecheck.fragment;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,12 +12,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.forfun.wecheck.R;
 import com.forfun.wecheck.cst.DatabaseCst;
@@ -28,7 +31,6 @@ import com.forfun.wecheck.database.DatabaseOpenHelper;
  */
 public class SearchFragment extends Fragment {
 
-	private static final String COLUMN_ID = "_id";
 	private View _view = null;
 
 	@Override
@@ -41,12 +43,12 @@ public class SearchFragment extends Fragment {
 		// database handler
 		DatabaseOpenHelper dbHelper = new DatabaseOpenHelper(_view.getContext());
 
-		Cursor cursor = dbHelper.getReadableDatabase().query(DatabaseCst.TABLE_CATEGORY, new String[] { "NAME_EN", COLUMN_ID }, null, null, null, null,
-				COLUMN_ID);
+		Cursor cursor = dbHelper.getReadableDatabase().query(DatabaseCst.VIEW_CATEGORY, new String[] { DatabaseCst.COLUMN_NAME, DatabaseCst.COLUMN_ID }, null,
+				null, null, null, DatabaseCst.COLUMN_ID);
 
 		// Creating adapter for spinner
-		SimpleCursorAdapter dataAdapter = new SimpleCursorAdapter(_view.getContext(), android.R.layout.simple_spinner_item, cursor, new String[] { "NAME_EN",
-				COLUMN_ID }, new int[] { android.R.id.text1, android.R.id.text2 }, 0);
+		SimpleCursorAdapter dataAdapter = new SimpleCursorAdapter(_view.getContext(), android.R.layout.simple_spinner_item, cursor, new String[] {
+				DatabaseCst.COLUMN_NAME, DatabaseCst.COLUMN_ID }, new int[] { android.R.id.text1, android.R.id.text2 }, 0);
 
 		// Specify the layout to use when the list of choices appears
 		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -66,18 +68,38 @@ public class SearchFragment extends Fragment {
 				// database handler
 				DatabaseOpenHelper dbHelper = new DatabaseOpenHelper(_view.getContext());
 
-				Cursor cursor = dbHelper.getReadableDatabase().query(DatabaseCst.TABLE_SUB_CATEGORY, new String[] { "NAME_EN", COLUMN_ID },
-						"CATEGORY_ID = " + spinner.getSelectedItemId(), null, null, null, COLUMN_ID);
+				Cursor cursor = dbHelper.getReadableDatabase().query(DatabaseCst.VIEW_SUB_CATEGORY,
+						new String[] { DatabaseCst.COLUMN_NAME, DatabaseCst.COLUMN_ID }, "CATEGORY_ID = " + spinner.getSelectedItemId(), null, null, null,
+						DatabaseCst.COLUMN_ID);
 
 				// Creating adapter for spinner
 				SimpleCursorAdapter dataAdapter = new SimpleCursorAdapter(_view.getContext(), android.R.layout.simple_spinner_item, cursor, new String[] {
-						"NAME_EN", COLUMN_ID }, new int[] { android.R.id.text1, android.R.id.text2 }, 0);
+						DatabaseCst.COLUMN_NAME, DatabaseCst.COLUMN_ID }, new int[] { android.R.id.text1, android.R.id.text2 }, 0);
 
 				// Specify the layout to use when the list of choices appears
 				dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
 				// Apply the adapter to the spinner
 				subCategorySpinner.setAdapter(dataAdapter);
+
+				subCategorySpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+					@Override
+					public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+
+						Spinner subCategorySpinner = (Spinner) _view.findViewById(R.id.search_subCategory);
+
+						String filter = "SUB_CATEGORY_ID = " + subCategorySpinner.getSelectedItemId();
+
+						setResultListAdaptor(filter);
+					}
+
+					@Override
+					public void onNothingSelected(AdapterView<?> arg0) {
+
+					}
+
+				});
 			}
 
 			@Override
@@ -93,25 +115,42 @@ public class SearchFragment extends Fragment {
 
 			@Override
 			public void onClick(View arg0) {
-				ListView resultListView = (ListView) _view.findViewById(R.id.search_result);
 
-				Spinner subCategorySpinner = (Spinner) _view.findViewById(R.id.search_subCategory);
+				TextView searchTextView = (TextView) _view.findViewById(R.id.search_text);
 
-				// database handler
-				DatabaseOpenHelper dbHelper = new DatabaseOpenHelper(_view.getContext());
+				if (searchTextView.getText() != null) {
 
-				Cursor cursor = dbHelper.getReadableDatabase().query(DatabaseCst.TABLE_ITEM, new String[] { "NAME_EN", COLUMN_ID },
-						"SUB_CATEGORY_ID = " + subCategorySpinner.getSelectedItemId(), null, null, null, COLUMN_ID);
+					String filter = "BRAND_EN || NAME_EN LIKE '%" + searchTextView.getText() + "%' OR BRAND_SC || NAME_SC LIKE '%" + searchTextView.getText()
+							+ "%' OR BRAND_TC || NAME_TC LIKE '%" + searchTextView.getText() + "%'";
 
-				SimpleCursorAdapter dataAdapter = new SimpleCursorAdapter(_view.getContext(), android.R.layout.simple_spinner_item, cursor, new String[] {
-						"NAME_EN", COLUMN_ID }, new int[] { android.R.id.text1, android.R.id.text2 }, 0);
+					setResultListAdaptor(filter);
+				}
 
-				// Apply the adapter to the spinner
-				resultListView.setAdapter(dataAdapter);
+				InputMethodManager imm = (InputMethodManager) _view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(arg0.getWindowToken(), 0);
 			}
 
 		});
 
 		return _view;
+	}
+
+	private void setResultListAdaptor(String filter) {
+		ListView resultListView = (ListView) _view.findViewById(R.id.search_result);
+
+		// database handler
+		DatabaseOpenHelper dbHelper = new DatabaseOpenHelper(_view.getContext());
+
+		Cursor cursor = dbHelper.getReadableDatabase().query(DatabaseCst.VIEW_ITEM,
+				new String[] { DatabaseCst.COLUMN_BRAND, DatabaseCst.COLUMN_NAME, DatabaseCst.COLUMN_ID }, filter, null, null, null, DatabaseCst.COLUMN_ID);
+
+		SimpleCursorAdapter dataAdapter = new SimpleCursorAdapter(_view.getContext(), R.layout.search_result_row, cursor, new String[] {
+				DatabaseCst.COLUMN_BRAND, DatabaseCst.COLUMN_NAME, DatabaseCst.COLUMN_ID }, new int[] { R.id.search_result_brand, R.id.search_result_name,
+				R.id.search_result_price }, 0);
+
+		// Apply the adapter to the spinner
+		resultListView.setAdapter(dataAdapter);
+		
+		dbHelper.close();
 	}
 }
