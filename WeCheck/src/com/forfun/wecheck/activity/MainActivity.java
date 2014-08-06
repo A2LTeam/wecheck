@@ -3,9 +3,12 @@
  */
 package com.forfun.wecheck.activity;
 
+import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTabHost;
+import android.widget.LinearLayout;
 import android.widget.TabHost.TabSpec;
 
 import com.forfun.wecheck.R;
@@ -16,7 +19,7 @@ import com.forfun.wecheck.fragment.ScanFragment;
 import com.forfun.wecheck.fragment.SearchFragment;
 
 /**
- * activity handling for application 
+ * activity handling for application
  * 
  * @author Nick
  * 
@@ -47,19 +50,24 @@ public class MainActivity extends FragmentActivity {
 		_tabHost.setup(this, getSupportFragmentManager(), R.id.tabcontent);
 
 		TabSpec tabSpecScan = _tabHost.newTabSpec("scan");
-		_tabHost.addTab(tabSpecScan.setIndicator(getText(R.string.tab_scan), getResources().getDrawable(R.drawable.ic_tab_selector_scan)), ScanFragment.class,
-				null);
+		_tabHost.addTab(
+				tabSpecScan.setIndicator(getText(R.string.tab_scan),
+						getResources().getDrawable(R.drawable.ic_tab_selector_scan)), ScanFragment.class, null);
 
 		TabSpec tabSpecHot = _tabHost.newTabSpec("hot");
-		_tabHost.addTab(tabSpecHot.setIndicator(getText(R.string.tab_hot), getResources().getDrawable(R.drawable.ic_tab_selector_hot)), HotFragment.class, null);
+		_tabHost.addTab(
+				tabSpecHot.setIndicator(getText(R.string.tab_hot),
+						getResources().getDrawable(R.drawable.ic_tab_selector_hot)), HotFragment.class, null);
 
 		TabSpec tabSpecFavorite = _tabHost.newTabSpec("favorite");
-		_tabHost.addTab(tabSpecFavorite.setIndicator(getText(R.string.tab_favorite), getResources().getDrawable(R.drawable.ic_tab_selector_favorite)),
-				FavoriteFragment.class, null);
+		_tabHost.addTab(
+				tabSpecFavorite.setIndicator(getText(R.string.tab_favorite),
+						getResources().getDrawable(R.drawable.ic_tab_selector_favorite)), FavoriteFragment.class, null);
 
 		TabSpec tabSpecSearch = _tabHost.newTabSpec("search");
-		_tabHost.addTab(tabSpecSearch.setIndicator(getText(R.string.tab_search), getResources().getDrawable(R.drawable.ic_tab_selector_search)),
-				SearchFragment.class, null);
+		_tabHost.addTab(
+				tabSpecSearch.setIndicator(getText(R.string.tab_search),
+						getResources().getDrawable(R.drawable.ic_tab_selector_search)), SearchFragment.class, null);
 
 		_tabHost.setCurrentTab(1);
 
@@ -72,6 +80,22 @@ public class MainActivity extends FragmentActivity {
 		// _tabHost.getTabWidget().getChildAt(0).findViewById(android.R.id.title)).setVisibility(View.VISIBLE);
 	}
 
+	@Override
+	public void onBackPressed() {
+		FragmentManager fragmentManager = getSupportFragmentManager();
+		if (fragmentManager.getBackStackEntryCount() == 0) {
+			this.finish();
+		}
+		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+		if (_tabHost.getCurrentTab() == 0) {
+			((LinearLayout)findViewById(R.id.scan)).removeAllViews(); 
+			ScanFragment scanFragment = new ScanFragment();
+			fragmentManager.popBackStack();
+			fragmentTransaction.replace(R.id.scan, scanFragment);
+			fragmentTransaction.commit();
+		}
+	}
+
 	private void openDatabase() {
 		_dbHelper = new DatabaseOpenHelper(this);
 	}
@@ -79,4 +103,5 @@ public class MainActivity extends FragmentActivity {
 	private void closeDatabase() {
 		_dbHelper.close();
 	}
+
 }

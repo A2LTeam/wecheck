@@ -12,6 +12,11 @@
     <string name="search_select_category">Select category:</string>
     <string name="search_select_subcategory">Select sub-category</string>
     
+    <!-- Item in Shops -->
+    <string name="item_name">Item Name :</string>
+    <string name="item_price">Price :</string>
+    <string name="shop_name">Shop Name :</string>
+    
     <string-array name="category">
         <item>c1</item>
         <item>c2</item>

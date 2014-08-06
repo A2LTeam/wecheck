@@ -16,12 +16,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.forfun.wecheck.R;
@@ -43,6 +46,7 @@ public class ScanFragment extends Fragment {
 
 	private boolean barcodeScanned = false;
 	private boolean previewing = true;
+	FrameLayout preview;
 
 	static {
 		System.loadLibrary("iconv");
@@ -63,7 +67,7 @@ public class ScanFragment extends Fragment {
 		scanner.setConfig(0, Config.Y_DENSITY, 3);
 
 		mPreview = new CameraPreview(getActivity(), mCamera, previewCb, autoFocusCB);
-		FrameLayout preview = (FrameLayout) V.findViewById(R.id.cameraPreview);
+		preview = (FrameLayout) V.findViewById(R.id.cameraPreview);
 		preview.addView(mPreview);
 
 		scanText = (TextView) V.findViewById(R.id.scanText);
@@ -72,14 +76,26 @@ public class ScanFragment extends Fragment {
 
 		scanButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				if (barcodeScanned) {
-					barcodeScanned = false;
-					scanText.setText("Scanning...");
-					mCamera.setPreviewCallback(previewCb);
-					mCamera.startPreview();
-					previewing = true;
-					mCamera.autoFocus(autoFocusCB);
-				}
+				((LinearLayout) getActivity().findViewById(R.id.scan)).removeAllViews(); 
+				ItemDetailFragment itemDetailFragment = new ItemDetailFragment();
+				FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+				FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+				final Bundle bundle = new Bundle();
+				bundle.putString("itemName", "ABCDE");
+				bundle.putInt("itemId", 153);
+				itemDetailFragment.setArguments(bundle);
+
+				fragmentTransaction.addToBackStack("test");
+				fragmentTransaction.replace(R.id.scan, itemDetailFragment);
+				fragmentTransaction.commit();
+//				if (barcodeScanned) {
+//					barcodeScanned = false;
+//					scanText.setText("Scanning...");
+//					mCamera.setPreviewCallback(previewCb);
+//					mCamera.startPreview();
+//					previewing = true;
+//					mCamera.autoFocus(autoFocusCB);
+//				}
 			}
 		});
 		return V;
