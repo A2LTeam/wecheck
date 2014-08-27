@@ -38,7 +38,7 @@ class Item implements JsonSerializable {
 }
 
 // Create connection
-$con=mysqli_connect("mysql.serversfree.com","u363963258_test","password","u363963258_test");
+$con=mysqli_connect("localhost","wecheck","password","wecheck");
 
 // Check connection
 if (mysqli_connect_errno()) {
@@ -48,7 +48,9 @@ if (mysqli_connect_errno()) {
 else
 {
 	$result = mysqli_query($con,"SELECT * FROM ITEM");
+
 	while($row = mysqli_fetch_array($result)) {
+
 		$item = new Item();
 		$item->id = $row["ID"];
 		$item->itemCode = $row["ITEM_CODE"];
@@ -63,7 +65,6 @@ else
 	mysqli_free_result($result);
 	
 	echo json_encode(new ItemList($items), JSON_UNESCAPED_UNICODE);
-
 }
 
 mysqli_close($con);

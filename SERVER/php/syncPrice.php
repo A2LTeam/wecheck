@@ -1,6 +1,9 @@
 <?php
 include 'simple_html_dom.php';
 
+//place this before any script you want to calculate time
+$time_start = microtime(true);
+
 ini_set('memory_limit', '256M');
 
 // Ignore user aborts and allow the script
@@ -22,10 +25,6 @@ function log_error( $num, $str, $file, $line, $context = null )
  */
 function log_exception( Exception $e )
 {
-    global $config;
-    
-    if ( $config["debug"] == true )
-    {
         print "<div style='text-align: center;'>";
         print "<h2 style='color: rgb(190, 50, 50);'>Exception Occured:</h2>";
         print "<table style='width: 800px; display: inline-block;'>";
@@ -34,13 +33,6 @@ function log_exception( Exception $e )
         print "<tr style='background-color:rgb(230,230,230);'><th>File</th><td>{$e->getFile()}</td></tr>";
         print "<tr style='background-color:rgb(240,240,240);'><th>Line</th><td>{$e->getLine()}</td></tr>";
         print "</table></div>";
-    }
-    else
-    {
-        $message = "Type: " . get_class( $e ) . "; Message: {$e->getMessage()}; File: {$e->getFile()}; Line: {$e->getLine()};";
-        file_put_contents( $config["app_dir"] . "/tmp/logs/exceptions.log", $message . PHP_EOL, FILE_APPEND );
-        header( "Location: {$config["error_page"]}" );
-    }
     
     exit();
 }
@@ -50,7 +42,7 @@ function log_exception( Exception $e )
  */
 function check_for_fatal()
 {
-    print("Connection status :".connection_status()."<br>");
+    print("Connection status :".connection_status()."\r\n");
     $error = error_get_last();
     if ( $error["type"] == E_ERROR )
         log_error( $error["type"], $error["message"], $error["file"], $error["line"] );
@@ -67,12 +59,12 @@ try {
 	date_default_timezone_set("Hongkong");
 	$today = date('Y-m-d', time());
 
-print(">>> Start Synchronize Shop Price On Date '$today'<br>");
+print(">>> Start Synchronize Shop Price On Date '$today'\r\n");
 
-print(" >> Max Time : ".ini_get('max_execution_time')."<br>");
+print(" >> Max Time : ".ini_get('max_execution_time')."\r\n");
 
 // Create connection
-$con=mysqli_connect("mysql.serversfree.com","u363963258_test","password","u363963258_test");
+$con=mysqli_connect("localhost","wecheck","password","wecheck");
 
 // Check connection
 if (mysqli_connect_errno()) {
@@ -82,9 +74,9 @@ if (mysqli_connect_errno()) {
 else
 {
 	// query unprocessed item
-	$result = mysqli_query($con,"SELECT ID, ITEM_CODE FROM ITEM WHERE ID > IFNULL((SELECT MAX(ITEM_ID) FROM SHOP_ITEM WHERE EFF_DATE = '$today'), 0) ORDER BY ID LIMIT 100"); 
+	$result = mysqli_query($con,"SELECT ID, ITEM_CODE FROM ITEM WHERE ID > IFNULL((SELECT MAX(ITEM_ID) FROM SHOP_ITEM WHERE EFF_DATE = '$today'), 0) ORDER BY ID"); 
 	
-	print("# of item to process : $result->num_rows<br>");
+	print("# of item to process : $result->num_rows\r\n");
 	
 	if (!empty($result)) {
 	while($row = mysqli_fetch_array($result)) {
@@ -92,7 +84,7 @@ else
 		$id = $row["ID"];
 		$itemCode = $row["ITEM_CODE"];
 
-		print("<br> >> Start processing item id: [$id] Code: [$itemCode]<br>");
+		print("\r\n >> Start processing item id: [$id] Code: [$itemCode]\r\n");
 
 		// Create DOM from URL
 		$html = file_get_html('http://www.consumer.org.hk/fc/txtver/b5_price_detail.php?itemcode='.$itemCode);
@@ -107,12 +99,12 @@ else
 
 			$priceArray = explode(' ', $price);
 			$price = $priceArray[0];
-//			$priceOther = $priceArray[1];
 
 			if ($price != "--") {
 				// get the shop id
-//				print("Finding shop : $shopName<br>");
-			
+				// print("Finding shop : $shopName\r\n");
+		
+				mysqli_set_charset($con, 'utf8');	
 				$shopResult = mysqli_query($con,"SELECT ID FROM SHOP WHERE NAME_TC = '$shopName'");
 
 				if (!empty($shopResult)) {
@@ -123,7 +115,7 @@ else
 					// get the previous price
 					$prevPrice = "null";
 					
-//					print("Finding Previous Price for Id : $id Date : $date<br>");	
+//					print("Finding Previous Price for Id : $id Date : $date\r\n");	
 
 					$prevPriceResult = mysqli_query($con,"SELECT PRICE FROM SHOP_ITEM WHERE ID = $id AND EFF_DATE < '$date' ORDER BY EFF_DATE DESC LIMIT 1");
 
@@ -135,44 +127,56 @@ else
 						mysqli_free_result($prevPriceResult);
 					}
 
-					$insert = "INSERT INTO SHOP_ITEM (SHOP_ID, ITEM_ID, PRICE, EFF_DATE, PREV_PRICE) VALUES ($shopId,$id,$price,'$date',$prevPrice)";
+					$priceOther = "null";
+					if (sizeof($priceArray) > 1) {
+						$priceOther = $priceArray[1];
+					}
+
+					$insert = "INSERT INTO SHOP_ITEM (SHOP_ID, ITEM_ID, PRICE, EFF_DATE, PREV_PRICE, PROMOTE) VALUES ($shopId,$id,$price,'$date',$prevPrice, $priceOther)";
 	
-//					print("Insert statement : $insert<br>");
+//					print("Insert statement : $insert\r\n");
 	
 					mysqli_query($con, $insert) or mysqli_error($con)." Q=".$insert;
 				
-					print("Statement executed.<br>");
+			//		print("Statement executed.\r\n");
 
 				} else {
-					print(" > Cannot find shop : $shopName<br>");
+					print(" > ERROR ! Cannot find shop : [$shopName]\r\n");
 				}
 
 				mysqli_free_result($shopResult);
 
 			} else {
-//				print("Price not found for shop : $shopName<br>");
+//				print("Price not found for shop : $shopName\r\n");
 			}
 		}
 
-//		print("Clean up memory.<br>");
+//		print("Clean up memory.\r\n");
 
 		// clean up memory
 		$html->clear(); 
 		unset($html);
 		
-		print(" >> Completed processing item : $itemCode<br>");
+		print(" >> Completed processing item : [$itemCode]\r\n");
 	}
 	}
 
 	mysqli_free_result($result);
 }
 
-print(">>> Completed Synchronization");
+print(">>> Completed Synchronization\r\n");
 
 } catch (Exception $e) {
-    print 'Caught exception: '.  $e->getMessage(). "<br>";
+    print 'Caught exception: '.  $e->getMessage(). "\r\n";
 }
 
 mysqli_close($con);
+
+$time_end = microtime(true);
+//dividing with 60 will give the execution time in minutes other wise seconds
+$execution_time = ($time_end - $time_start);
+
+//execution time of the script
+echo '<b>Total Execution Time:</b> '.$execution_time.' sec';
 
 ?>

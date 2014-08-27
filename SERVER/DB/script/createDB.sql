@@ -4,12 +4,22 @@
 CREATE TABLE IF NOT EXISTS `CATEGORY` (
   `ID` BIGINT NOT NULL,
   `CAT_NAME_EN` VARCHAR(128) NOT NULL,
-  `SUB_CAT_NAME_EN` VARCHAR(128) NULL,
   `CAT_NAME_TC` VARCHAR(128) NOT NULL,
-  `SUB_CAT_NAME_TC` VARCHAR(128) NULL,
   `CAT_NAME_SC` VARCHAR(128) NOT NULL,
-  `SUB_CAT_NAME_SC` VARCHAR(128) NULL,
   PRIMARY KEY (`ID`));
+
+-- -----------------------------------------------------
+-- Table `SUB_CATEGORY`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `SUB_CATEGORY` (
+  `ID` bigint(20) NOT NULL,
+  `CATEGORY_ID` bigint(20) NOT NULL,
+  `NAME_EN` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
+  `NAME_TC` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
+  `NAME_SC` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`ID`,`CATEGORY_ID`),
+  KEY `CATEGORY_ID` (`CATEGORY_ID`)
+);
 
 -- -----------------------------------------------------
 -- Table `ITEM`
@@ -32,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `ITEM` (
   UNIQUE INDEX `BARCODE_UNIQUE` (`BARCODE` ASC),
   CONSTRAINT `fk_ITEM_CATEGORY1`
     FOREIGN KEY (`CATEGORY_ID`)
-    REFERENCES `CATEGORY` (`ID`)
+    REFERENCES `SUB_CATEGORY` (`ID`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
 
@@ -43,9 +53,9 @@ CREATE TABLE IF NOT EXISTS `ITEM` (
 CREATE TABLE IF NOT EXISTS `SHOP` (
   `ID` BIGINT NOT NULL,
   `ORDER_INDEX` INT NULL,
-  `NAME_EN` VARCHAR(45) NULL,
-  `NAME_TC` VARCHAR(45) NULL,
-  `NAME_SC` VARCHAR(45) NULL,
+  `NAME_EN` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
+  `NAME_TC` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
+  `NAME_SC` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`ID`));
 
 -- -----------------------------------------------------
@@ -66,21 +76,6 @@ CREATE TABLE IF NOT EXISTS `SHOP_ITEM` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_SHOP_ITEM_ITEM1`
-    FOREIGN KEY (`ITEM_ID`)
-    REFERENCES `ITEM` (`ID`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION);
-
--- -----------------------------------------------------
--- Table `QUERY_HIST`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `QUERY_HIST` (
-  `ITEM_ID` BIGINT NOT NULL,
-  `QUERY_DATE` DATE NOT NULL,
-  `QUERY_COUNT` INT NOT NULL DEFAULT 0,
-  PRIMARY KEY (`QUERY_DATE`, `ITEM_ID`),
-  INDEX `fk_QUERY_HIST_ITEM1_idx` (`ITEM_ID` ASC),
-  CONSTRAINT `fk_QUERY_HIST_ITEM1`
     FOREIGN KEY (`ITEM_ID`)
     REFERENCES `ITEM` (`ID`)
     ON DELETE NO ACTION
